@@ -2,9 +2,13 @@ class example extends Phaser.Scene {
     constructor() {
         super({ key: "example", active: true });
         this.run = {};
+
+        this.enimyR3 = [];
+        this.enimyR2 = [];
+        this.enimyR1 = [];
         this.enimyR = [];
-        this.enimy = [];
-        this.i = 0;
+        this.time = 0;
+        this.fire2 = {};
     }
 
     preload() {
@@ -62,8 +66,11 @@ class example extends Phaser.Scene {
         this.load.image('attack16', 'assets/attack/adventurer-attack3-04.png');
         this.load.image('attack17', 'assets/attack/adventurer-attack3-05.png');
 
-        //ehimy
+        //enimy
         this.load.spritesheet('enimy', 'assets/enimy/enimy.png', { frameWidth: 256, frameHight: 256 });
+        this.load.spritesheet('fire', 'assets/fire/fire.png', { frameWidth: 100, frameHight: 100 });
+        this.load.spritesheet('fire2', 'assets/fire/fire2.png', { frameWidth: 100, frameHight: 100 });
+        this.load.spritesheet('landFire', 'assets/fire/landFire.png', { frameWidth: 100, frameHight: 100 });
 
         //enimy right
         this.load.image('enimyR1', 'assets/enimy/enimyRightSide/tile000-ConvertImage.png');
@@ -78,6 +85,14 @@ class example extends Phaser.Scene {
         this.load.image('enimyR10', 'assets/enimy/enimyRightSide/tile009-ConvertImage.png');
         this.load.image('enimyR11', 'assets/enimy/enimyRightSide/tile010-ConvertImage.png');
 
+        //die
+        this.load.image('die1', 'assets/die/adventurer-die-00.png');
+        this.load.image('die2', 'assets/die/adventurer-die-01.png');
+        this.load.image('die3', 'assets/die/adventurer-die-02.png');
+        this.load.image('die4', 'assets/die/adventurer-die-03.png');
+        this.load.image('die5', 'assets/die/adventurer-die-04.png');
+        this.load.image('die6', 'assets/die/adventurer-die-05.png');
+        this.load.image('die7', 'assets/die/adventurer-die-06.png');
     }
 
     create() {
@@ -159,7 +174,24 @@ class example extends Phaser.Scene {
             //hideOnComplete: true
         });
 
-        //attack
+        //die
+        this.anims.create({
+            key: 'die',
+            frames: [
+                { key: 'die1' },
+                { key: 'die2' },
+                { key: 'die3' },
+                { key: 'die4' },
+                { key: 'die5' },
+                { key: 'die6' },
+                { key: 'die7' }
+            ],
+            frameRate: 7,
+            repeat: 1000,
+            //hideOnComplete: true
+        });
+
+        /////////////////////////////////////////////////////////////////////////////////
         //run left
         this.anims.create({
             key: 'attack',
@@ -186,8 +218,8 @@ class example extends Phaser.Scene {
             repeat: 0,
             //hideOnComplete: true
         });
-
-        this.enimy = this.add.sprite(160, 150, 'enimy');
+        /////////////////////////////////////////////////////////////////////////////////
+        this.enimyR = this.add.sprite(160, 150, 'enimy');
 
         //enimy
         this.anims.create({
@@ -197,10 +229,56 @@ class example extends Phaser.Scene {
             frames: this.anims.generateFrameNames('enimy', { start: 1, end: 10 })
         });
 
-        this.enimy.play('enimy1');
-        this.enimy.displayWidth = 100;
-        this.enimy.displayHeight = 100;
+        this.enimyR.play('enimy1');
+        this.enimyR.displayWidth = 100;
+        this.enimyR.displayHeight = 100;
+        //////////////////////////////////////////////////////////////////////////////////
+        //fire
+        // this.fire = this.add.sprite(160, 150, 'fire');
 
+        // this.anims.create({
+        //     key: 'fireShot',
+        //     repeat: 1000,
+        //     frameRate: 7,
+        //     frames: this.anims.generateFrameNames('fire', { start: 1, end: 10 })
+        // });
+
+        // this.fire.play('fireShot');
+        // this.fire.displayWidth = 100;
+        // this.fire.displayHeight = 100;
+
+        //fire
+        this.fire2 = this.physics.add.sprite(130, 130, 'fire2');
+        this.fire2.setSize(20,20,true);
+
+        this.anims.create({
+            key: 'fireShot2',
+            repeat: 1000,
+            frameRate: 7,
+            frames: this.anims.generateFrameNames('fire2', { start: 1, end: 60 })
+        });
+
+        this.fire2.play('fireShot2');
+        this.fire2.displayWidth = 100;
+        this.fire2.displayHeight = 100;
+        this.fire2.angle = 20;
+        /////////////////////////////////////////////////////////////////////////////
+        //landfire
+        // this.landFire = this.physics.add.sprite(130, 130, 'landFire');
+        // this.landFire.setSize(20,20,true);
+
+        this.anims.create({
+            key: 'LandFireAnim',
+            repeat: 0,
+            frameRate: 7,
+            frames: this.anims.generateFrameNames('landFire', { start: 1, end: 61 })
+        });
+
+        // this.landFire.play('LandFireAnim');
+        // this.landFire.displayWidth = 100;
+        // this.landFire.displayHeight = 100;
+        // this.landFire.angle = 20;
+        /////////////////////////////////////////////////////////////////////////////
         //enimy right side
         this.anims.create({
             key: 'enimyRight',
@@ -244,6 +322,8 @@ class example extends Phaser.Scene {
         //scroll background
         this.backgroud.tilePositionX += 1;
 
+        //collide
+        this.a = this.physics.overlap(this.fire2, this.land1, this.collision1, null, this);
         //key handle
         if (this.keys_handle.right.isDown) {
             this.stand.x++;
@@ -256,7 +336,10 @@ class example extends Phaser.Scene {
             this.stand.anims.play('jump', true)
         } else if (this.key_ENTER.isDown) {
             this.stand.anims.play('attack', true)
-        } else {
+        } else if (this.a == true) {
+            this.landFire.destroy();
+            this.stand.anims.play('die', true)
+        }else {
             this.stand.anims.play('stand', true)
         }
 
@@ -265,22 +348,43 @@ class example extends Phaser.Scene {
             // this.stand.anims.play('fall', true)
         }
 
-        //enimy
-        this.enimy.x--;
-        if (this.enimy.x == 20) {
-            
-            this.enimy.destroy();
-            this.enimyR = this.physics.add.sprite(this.enimy.x, 150, 'enimyR1').play('enimyRight');
-            this.enimyR.displayWidth = 100;
-            this.enimyR.displayHeight = 100;
-        }
-        this.enimyR.x++;
+        // enimy
+        // this.enimyMove();
 
-        if (this.enimyR.x == 220) {
+        setTimeout(() => {
+            this.enimyMove();
+        }, 4000)
+
+        this.fire2.x--;
+        this.fire2.y++;
+
+        
+    }
+
+    collision1(fire,land1){
+        fire.destroy();
+        this.landFire = this.physics.add.sprite(fire.x, fire.y, 'landFire');
+        this.landFire.setSize(20,20,true);
+        this.landFire.play('LandFireAnim',true);
+        return true;
+    }
+
+    enimyMove() {
+        this.enimyR.x--;
+        if (this.enimyR.x == 20) {
             this.enimyR.destroy();
-            this.enimyR3 = this.physics.add.sprite(this.enimyR.x, 150, 0).play('enimy1');
-            this.enimyR3.displayWidth = 100;
-            this.enimyR3.displayHeight = 100;
+            this.enimyR1 = this.physics.add.sprite(this.enimyR.x, 150, 'enimyR1').play('enimyRight');
+            this.enimyR1.displayWidth = 100;
+            this.enimyR1.displayHeight = 100;
+        }
+
+        if (this.enimyR1.x <= 220) {
+            this.enimyR1.x++;
+            this.enimyR1.anims.play('enimyRight', true)
+        }
+
+        if (this.enimyR1.x == 221) {
+            this.enimyR1.anims.play('enimy1', true)
         }
     }
 
